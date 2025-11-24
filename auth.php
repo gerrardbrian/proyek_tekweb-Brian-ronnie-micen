@@ -29,5 +29,31 @@ class auth {
         }
         return false; 
     }
+
+    public function register($username,$password,$nama_lengkap){
+        $checkQuery = "SELECT id FROM " . $this->table_name . " WHERE username = :username";
+        $stmt = $this->conn->prepare($checkQuery);
+        $stmt->bindParam(':username', $username);
+        $stmt->execeute();
+
+        if($stmt->rowCount() > 0){
+            return "Username sudah digunakan, cari yang lain";
+        }
+
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $role = 'user';
+
+        $query = "INSERT INTO " . $this->table_name . " (username, password, nama_lengkap, role) VALUES (:username, :password, :nama, :role)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':password', $hashed_password);
+        $stmt->bindParam(':nama', $nama_lengkap);
+        $stmt->bindParam(':role', $role);
+
+        if ($stmt-> execute()) {
+            return "success";
+        }
+            return "Pendaftaran gagal, silakan coba lagi.";
+    }
 }
 ?>
