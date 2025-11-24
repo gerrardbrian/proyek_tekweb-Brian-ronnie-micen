@@ -1,7 +1,7 @@
 <?php
-require_once 'Database.php';
+require_once 'database.php';
 
-class Auth {
+class auth {
     private $conn;
     private $table_name = "users";
 
