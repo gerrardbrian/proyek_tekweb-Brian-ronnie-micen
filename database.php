@@ -1,7 +1,7 @@
 <?php
 class database {
     private $host = "localhost";
-    private $db_name = ""; 
+    private $db_name = "proyek_tekweb"; 
     private $username = "root";
     private $password = "";
     public $conn;

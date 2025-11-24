@@ -1,5 +1,5 @@
 <?php
-require_once 'classes/auth.php';
+require_once 'auth.php';
 
 header('Content-Type: application/json');
 
@@ -12,7 +12,7 @@ if(empty($nama_lengkap) || empty($username) || empty($password)) {
     exit;
 }
 
-$auth = new Auth();
+$auth = new auth();
 $result = $auth->register($username, $password, $nama_lengkap);
 
 if ($result === true) {

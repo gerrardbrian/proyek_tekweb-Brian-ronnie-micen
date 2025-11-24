@@ -34,7 +34,7 @@ class auth {
         $checkQuery = "SELECT id FROM " . $this->table_name . " WHERE username = :username";
         $stmt = $this->conn->prepare($checkQuery);
         $stmt->bindParam(':username', $username);
-        $stmt->execeute();
+        $stmt->execute();
 
         if($stmt->rowCount() > 0){
             return "Username sudah digunakan, cari yang lain";
@@ -51,7 +51,7 @@ class auth {
         $stmt->bindParam(':role', $role);
 
         if ($stmt-> execute()) {
-            return "success";
+            return true;
         }
             return "Pendaftaran gagal, silakan coba lagi.";
     }
