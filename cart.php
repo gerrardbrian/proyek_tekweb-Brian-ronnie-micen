@@ -1,5 +1,5 @@
 <?php
-class cart {
+class Cart {
     public function __construct() {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();

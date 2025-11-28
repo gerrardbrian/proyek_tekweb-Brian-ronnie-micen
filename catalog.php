@@ -1,7 +1,7 @@
 <?php
 require_once 'database.php'; // Asumsi file koneksi database Ronnie
 
-class catalog {
+class Catalog {
     private $conn;
 
     public function __construct() {
