@@ -24,6 +24,32 @@ class cart {
         return $this->totalItems();
     }
 
+    // --- TAMBAHAN BARU ---
+    public function updateQty($id, $qty) {
+        if (isset($_SESSION['cart'][$id])) {
+            if ($qty > 0) {
+                $_SESSION['cart'][$id]['qty'] = $qty;
+            } else {
+                $this->remove($id); // Hapus jika qty 0
+            }
+        }
+    }
+
+    public function remove($id) {
+        if (isset($_SESSION['cart'][$id])) {
+            unset($_SESSION['cart'][$id]);
+        }
+    }
+
+    public function getTotalSum() {
+        $total = 0;
+        foreach ($_SESSION['cart'] as $item) {
+            $total += ($item['price'] * $item['qty']);
+        }
+        return $total;
+    }
+    // ---------------------
+
     public function totalItems() {
         $total = 0;
         foreach ($_SESSION['cart'] as $item) {
@@ -34,10 +60,6 @@ class cart {
 
     public function getContent() {
         return $_SESSION['cart'];
-    }
-    
-    public function clear() {
-        $_SESSION['cart'] = [];
     }
 }
 ?>
