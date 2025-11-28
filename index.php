@@ -18,7 +18,7 @@
         <div class="container">
             <a class="navbar-brand text-warning" href="#">LUXURY STORE</a>
             <div class="d-flex">
-                <a href="cart_view.html" class="btn btn-outline-warning position-relative">
+                <a href="cart_view.php" class="btn btn-outline-warning position-relative">
                     🛒 Keranjang
                     <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         <?php 

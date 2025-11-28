@@ -1,5 +1,5 @@
 <?php
-require_once 'Cart.php';
+require_once 'cart.php';
 $cart = new Cart();
 $items = $cart->getContent();
 ?>
@@ -12,9 +12,8 @@ $items = $cart->getContent();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        /* Styling Mewah Albert Michael */
         body { background-color: #f8f9fa; font-family: 'Times New Roman', serif; }
-        .table-cart th { background-color: #1a1a1a; color: #d4af37; border: none; } /* Hitam Emas */
+        .table-cart th { background-color: #1a1a1a; color: #d4af37; border: none; }
         .btn-luxury { background-color: #000; color: #fff; border: 1px solid #000; }
         .btn-luxury:hover { background-color: #d4af37; color: #000; border-color: #d4af37; }
         .cart-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
@@ -33,11 +32,13 @@ $items = $cart->getContent();
         <h2 class="mb-4 fw-bold">Shopping Cart</h2>
 
         <?php if (empty($items)): ?>
+            
             <div class="alert alert-warning text-center p-5">
                 <h4>Keranjang Anda Kosong</h4>
                 <p>Belum ada barang mewah yang Anda pilih.</p>
                 <a href="index.php" class="btn btn-dark mt-3">Mulai Belanja</a>
             </div>
+
         <?php else: ?>
 
             <div class="row">
@@ -60,7 +61,7 @@ $items = $cart->getContent();
                                 <tr id="row-<?php echo $item['id']; ?>">
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="uploads/<?php echo $item['image']; ?>" class="cart-img me-3" alt="Produk">
+                                            <img src="uploads/<?php echo $item['image']; ?>" class="cart-img me-3" alt="Img">
                                             <div>
                                                 <h6 class="mb-0 fw-bold"><?php echo htmlspecialchars($item['name']); ?></h6>
                                             </div>
@@ -98,7 +99,11 @@ $items = $cart->getContent();
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-3">
                                 <span>Total Belanja</span>
-                                <span class="fw-bold fs-5">Rp <span id="grand-total"><?php echo number_format($cart->getTotalSum(), 0, ',', '.'); ?></span></span>
+                                <span class="fw-bold fs-5">
+                                    Rp <span id="grand-total">
+                                        <?php echo number_format($cart->getTotalSum(), 0, ',', '.'); ?>
+                                    </span>
+                                </span>
                             </div>
                             <hr>
                             <a href="checkout.php" class="btn btn-luxury w-100 py-2 fw-bold">CHECKOUT SEKARANG</a>
@@ -112,37 +117,32 @@ $items = $cart->getContent();
 
     <script>
     $(document).ready(function() {
-
-        // 1. UPDATE QUANTITY
+        // Update Quantity
         $('.qty-input').on('change', function() {
             let id = $(this).data('id');
             let qty = $(this).val();
             let price = $(this).data('price');
+            
+            // Update Subtotal di layar (biar cepat)
             let rowSubtotal = price * qty;
+            $('#subtotal-' + id).text(new Intl.NumberFormat('id-ID').format(rowSubtotal));
 
-            // Update UI Subtotal baris ini dulu (biar responsif)
-            let formattedSubtotal = new Intl.NumberFormat('id-ID').format(rowSubtotal);
-            $('#subtotal-' + id).text(formattedSubtotal);
-
-            // Kirim AJAX ke Backend
+            // Kirim ke Backend
             $.ajax({
                 url: 'api_cart.php',
                 type: 'POST',
                 data: { action: 'update', id: id, qty: qty },
                 dataType: 'json',
                 success: function(response) {
-                    // Update Grand Total dari hitungan server
                     $('#grand-total').text(response.total_sum);
                 }
             });
         });
 
-        // 2. REMOVE ITEM
+        // Remove Item
         $('.btn-remove').on('click', function() {
-            if(!confirm('Yakin ingin menghapus barang ini?')) return;
-
-            let btn = $(this);
-            let id = btn.data('id');
+            if(!confirm('Hapus item ini?')) return;
+            let id = $(this).data('id');
 
             $.ajax({
                 url: 'api_cart.php',
@@ -150,24 +150,15 @@ $items = $cart->getContent();
                 data: { action: 'remove', id: id },
                 dataType: 'json',
                 success: function(response) {
-                    // Hapus baris tabel dengan efek fadeOut
                     $('#row-' + id).fadeOut(300, function() { 
                         $(this).remove(); 
-                        
-                        // Jika keranjang jadi kosong, reload halaman biar tampilan berubah
-                        if(response.total_sum == 0) {
-                            location.reload(); 
-                        }
+                        if(response.total_sum == 0) location.reload(); 
                     });
-
-                    // Update Grand Total
                     $('#grand-total').text(response.total_sum);
                 }
             });
         });
-
     });
     </script>
-
 </body>
 </html>
