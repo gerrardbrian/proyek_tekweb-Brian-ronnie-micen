@@ -1,7 +1,7 @@
 <?php
 require_once 'database.php';
 
-class Transaction {
+class transaction {
     private $conn;
 
     public function __construct() {
