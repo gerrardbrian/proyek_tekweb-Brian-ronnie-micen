@@ -123,6 +123,8 @@
                         $('#alert-message').text(response.message)
                                          .addClass('alert-danger')
                                          .removeClass('d-none alert-success');
+                        
+                        $('#registerForm')[0].reset();
                     }
                 },
                 error: function() {
