@@ -46,8 +46,8 @@ session_start();
                                     if(class_exists('cart')){
                                         $c = new cart(); 
                                         echo $c->totalItems(); 
-                                    } else { echo "0"; }
-                                } else { echo "0"; }
+                                    } else { echo "0"; } //biar angka di atas keranjang itu 0
+                                } else { echo "0"; } //biar angka di atas keranjang itu 0
                             ?>
                         </span>
                     </a>
