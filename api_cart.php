@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'cart.php';
 
 $action = $_POST['action'] ?? '';

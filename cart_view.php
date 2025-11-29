@@ -106,7 +106,9 @@ $items = $cart->getContent();
                                 </span>
                             </div>
                             <hr>
-                            <a href="checkout.php" class="btn btn-luxury w-100 py-2 fw-bold">CHECKOUT SEKARANG</a>
+                           <button id="btn-checkout" class="btn btn-luxury w-100 py-2 fw-bold">
+                                CHECKOUT SEKARANG
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -122,7 +124,8 @@ $items = $cart->getContent();
             let id = $(this).data('id');
             let qty = $(this).val();
             let price = $(this).data('price');
-            
+        
+
             // Update Subtotal di layar (biar cepat)
             let rowSubtotal = price * qty;
             $('#subtotal-' + id).text(new Intl.NumberFormat('id-ID').format(rowSubtotal));
@@ -157,6 +160,34 @@ $items = $cart->getContent();
                     $('#grand-total').text(response.total_sum);
                 }
             });
+        });
+
+        $('#btn-checkout').on('click', function() {
+            
+            if(!confirm("Apakah anda yakin ingin menyelesaikan pembelian?")) return;
+
+            let btn = $(this);
+            let origiinalText=btn.text();
+            btn.prop('disabled', true).text('Memproses Pesanan... 😃');
+
+            $.ajax({
+                url: 'api_checkout.php',
+                type:'POST',
+                dataType:'json',
+                success: function(response){
+                    if (response.status == 'success'){
+                        alert(response.message);
+                        window.location.href = 'index.php';
+
+                    }
+                    btn.prop('disabled',false).text(origiinalText);
+                },
+                error: function(){
+                    alert('Terjadi kesalahan saat memproses pesanan. Silahkan coba lagi.');
+                    btn.prop('disabled',false).text(origiinalText);
+                }
+            })
+
         });
     });
     </script>
