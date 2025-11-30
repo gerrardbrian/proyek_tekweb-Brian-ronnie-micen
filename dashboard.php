@@ -13,9 +13,10 @@ $orderObj = new admin_order($db);
 
 // Handle Form Submit (Tambah Produk)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
-    // Validasi sederhana
     if(!empty($_FILES['image']['name'])) {
-        if($productObj->create($_POST['name'], $_POST['price'], $_POST['desc'], $_FILES['image'])) {
+        // Asumsi fungsi create menerima (name, price, desc, stock, image)
+        // Pastikan urutan parameter di product.php sesuai
+        if($productObj->create($_POST['name'], $_POST['price'], $_POST['desc'], $_POST['stock'], $_FILES['image'])) {
             $success_msg = "Produk berhasil ditambahkan!";
         } else {
             $error_msg = "Gagal upload gambar atau simpan database.";
@@ -32,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
     <title>Admin Dashboard - Ronnie</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         body { background-color: #f8f9fa; }
@@ -57,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
                     <a href="#orders"><i class="fas fa-shopping-cart me-2"></i>Order Masuk</a>
                 </li>
                 <li class="nav-item mt-4">
-                    <a href="logout.php" class="text-danger"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                    <a href="#" onclick="confirmLogout(event)" class="text-danger"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
                 </li>
             </ul>
         </div>
@@ -88,6 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
                             </div>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Stok Awal</label>
+                            <input type="number" name="stock" class="form-control" placeholder="Jumlah stok..." required>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
                             <textarea name="desc" class="form-control" rows="2" placeholder="Detail produk..."></textarea>
                         </div>
@@ -115,19 +121,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
                                     <th>Gambar</th>
                                     <th>Nama Produk</th>
                                     <th>Harga</th>
-                                    <th width="150">Aksi</th>
+                                    <th>Stok</th> <th width="200">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="productTableBody">
                                 <?php
-                                $stmt = $productObj->readAll();
-                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                // Asumsi method readAll() mengambil semua kolom termasuk 'stock'
+                                $stmt = $productObj->readAll(); 
+                                // Jika pakai fetchAll di product.php:
+                                foreach ($stmt as $row) {
                                     $price = number_format($row['price'], 0, ',', '.');
+                                    // Default stock 0 jika null
+                                    $stock = isset($row['stock']) ? $row['stock'] : 0; 
+
                                     echo "<tr id='row-{$row['id']}'>";
                                     echo "<td><img src='uploads/{$row['image']}' class='img-thumbnail' style='width: 60px; height: 60px; object-fit: cover;'></td>";
                                     echo "<td class='fw-bold'>{$row['name']}</td>";
                                     echo "<td>Rp {$price}</td>";
+                                    echo "<td><span id='stock-display-{$row['id']}'>{$stock}</span> pcs</td>";
                                     echo "<td>
+                                            <button class='btn btn-sm btn-primary me-1' onclick='updateStock({$row['id']}, {$stock})'>
+                                                <i class='fas fa-edit'></i> Stok
+                                            </button>
                                             <button class='btn btn-sm btn-danger' onclick='deleteProduct({$row['id']})'>
                                                 <i class='fas fa-trash'></i> Hapus
                                             </button>
@@ -158,6 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
                         <tbody>
                             <?php
                             $stmtOrder = $orderObj->getAllOrders();
+                            // Jika getAllOrders return PDOStatement
                             while ($order = $stmtOrder->fetch(PDO::FETCH_ASSOC)) {
                                 $total = number_format($order['total_amount'], 0, ',', '.');
                                 $badge = $order['status'] == 'completed' ? 'bg-success' : 'bg-secondary';
@@ -180,24 +196,106 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
 <script>
-function deleteProduct(id) {
-    if(confirm('Yakin ingin menghapus barang ini secara permanen?')) {
-        fetch('api/admin_api.php?action=delete&id=' + id)
-        .then(response => response.json())
-        .then(data => {
-            if(data.status === 'success') {
-                // Animasi fade out sebelum menghapus elemen
-                let row = document.getElementById('row-' + id);
-                row.style.opacity = '0';
-                setTimeout(() => row.remove(), 500);
-            } else {
-                alert('Gagal menghapus data.');
-            }
-        });
-    }
+// 1. Fitur Logout dengan SweetAlert
+function confirmLogout(event) {
+    event.preventDefault(); // Mencegah link langsung jalan
+    Swal.fire({
+        title: 'Yakin ingin keluar?',
+        text: "Anda harus login kembali untuk mengakses halaman ini.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Logout!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'login.html';
+        }
+    })
 }
 
+// 2. Fitur Hapus dengan SweetAlert
+function deleteProduct(id) {
+    Swal.fire({
+        title: 'Hapus Barang?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Panggil API Hapus
+            fetch('api/admin_api.php?action=delete&id=' + id)
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    Swal.fire(
+                        'Terhapus!',
+                        'Data barang berhasil dihapus.',
+                        'success'
+                    );
+                    // Hapus baris tabel tanpa reload
+                    let row = document.getElementById('row-' + id);
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 500);
+                } else {
+                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
+                }
+            });
+        }
+    })
+}
+
+// 3. Fitur Update Stok dengan SweetAlert Input
+function updateStock(id, currentStock) {
+    Swal.fire({
+        title: 'Update Stok Barang',
+        input: 'number',
+        inputLabel: 'Masukkan jumlah stok baru',
+        inputValue: currentStock,
+        showCancelButton: true,
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Stok tidak boleh kosong!'
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let newStock = result.value;
+            
+            // Panggil API Update Stock (Pake FormData agar mudah)
+            let formData = new FormData();
+            formData.append('action', 'update_stock');
+            formData.append('id', id);
+            formData.append('stock', newStock);
+
+            fetch('api/admin_api.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    Swal.fire('Berhasil!', 'Stok berhasil diperbarui.', 'success');
+                    // Update tampilan stok di tabel secara langsung
+                    document.getElementById('stock-display-' + id).innerText = newStock;
+                    
+                    // Update tombol onclick agar angka stok terbaru tersimpan
+                    let btn = document.querySelector(`#row-${id} .btn-primary`);
+                    btn.setAttribute('onclick', `updateStock(${id}, ${newStock})`);
+                } else {
+                    Swal.fire('Error!', 'Gagal update stok.', 'error');
+                }
+            });
+        }
+    })
+}
+
+// 4. Fitur Search (Tetap sama)
 function searchProduct() {
     let keyword = document.getElementById('searchInput').value;
     let tbody = document.getElementById('productTableBody');
@@ -208,14 +306,19 @@ function searchProduct() {
         let html = '';
         if(data.length > 0) {
             data.forEach(item => {
-                // Format angka ke format Rupiah
                 let price = new Intl.NumberFormat('id-ID').format(item.price);
-                
+                // Tambahkan kolom stock di hasil pencarian juga
+                let stock = item.stock ? item.stock : 0;
+
                 html += `<tr id='row-${item.id}'>
                             <td><img src='uploads/${item.image}' class='img-thumbnail' style='width: 60px; height: 60px; object-fit: cover;'></td>
                             <td class='fw-bold'>${item.name}</td>
                             <td>Rp ${price}</td>
+                            <td><span id='stock-display-${item.id}'>${stock}</span> pcs</td>
                             <td>
+                                <button class='btn btn-sm btn-primary me-1' onclick='updateStock(${item.id}, ${stock})'>
+                                    <i class='fas fa-edit'></i> Stok
+                                </button>
                                 <button class='btn btn-sm btn-danger' onclick='deleteProduct(${item.id})'>
                                     <i class='fas fa-trash'></i> Hapus
                                 </button>
@@ -223,7 +326,7 @@ function searchProduct() {
                          </tr>`;
             });
         } else {
-            html = '<tr><td colspan="4" class="text-center text-muted py-3">Barang tidak ditemukan</td></tr>';
+            html = '<tr><td colspan="5" class="text-center text-muted py-3">Barang tidak ditemukan</td></tr>';
         }
         tbody.innerHTML = html;
     });
