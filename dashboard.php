@@ -216,7 +216,7 @@ function confirmLogout(event) {
     })
 }
 
-// 2. Fitur Hapus dengan SweetAlert
+// 2. FUNGSI HAPUS (Update untuk menampilkan pesan error spesifik)
 function deleteProduct(id) {
     Swal.fire({
         title: 'Hapus Barang?',
@@ -238,18 +238,24 @@ function deleteProduct(id) {
                         'Data barang berhasil dihapus.',
                         'success'
                     );
-                    // Hapus baris tabel tanpa reload
+                    // Hapus baris tabel
                     let row = document.getElementById('row-' + id);
-                    row.style.opacity = '0';
-                    setTimeout(() => row.remove(), 500);
+                    if(row) {
+                        row.style.opacity = '0';
+                        setTimeout(() => row.remove(), 500);
+                    }
                 } else {
-                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
+                    // TAMPILKAN PESAN ERROR DARI SERVER DI SINI
+                    Swal.fire('Gagal!', data.message, 'error');
                 }
+            })
+            .catch(error => {
+                console.error(error);
+                Swal.fire('Error!', 'Terjadi kesalahan jaringan/server.', 'error');
             });
         }
     })
 }
-
 // 3. Fitur Update Stok dengan SweetAlert Input
 function updateStock(id, currentStock) {
     Swal.fire({

@@ -46,28 +46,47 @@ class product {
     }
 
     // 3. DELETE (Untuk AJAX)
+   // 3. DELETE (DIPERBAIKI UNTUK MENANGKAP ERROR)
     public function delete($id) {
-        // Ambil nama file dulu untuk dihapus dari folder
-        $querySelect = "SELECT image FROM " . $this->table . " WHERE id = :id";
-        $stmtSelect = $this->conn->prepare($querySelect);
-        $stmtSelect->bindParam(":id", $id);
-        $stmtSelect->execute();
-        $row = $stmtSelect->fetch(PDO::FETCH_ASSOC);
+        try {
+            // 1. Cek apakah barang ini ada di order_details (Sudah pernah laku?)
+            $queryCek = "SELECT COUNT(*) as total FROM order_details WHERE product_id = :id";
+            $stmtCek = $this->conn->prepare($queryCek);
+            $stmtCek->bindParam(":id", $id);
+            $stmtCek->execute();
+            $rowCek = $stmtCek->fetch(PDO::FETCH_ASSOC);
 
-        if($row) {
-            $filePath = "uploads/" . $row['image']; // Pastikan path sesuai
-            if(file_exists($filePath)) { unlink($filePath); } 
-        }
+            // Jika barang sudah pernah dibeli, JANGAN HAPUS.
+            if ($rowCek['total'] > 0) {
+                return "Gagal: Barang ini ada di riwayat transaksi. Tidak bisa dihapus.";
+            }
 
-        // Hapus data di DB
-        $query = "DELETE FROM " . $this->table . " WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id);
-        
-        if($stmt->execute()){
-            return true;
+            // 2. Jika aman, hapus gambarnya dulu
+            $querySelect = "SELECT image FROM " . $this->table . " WHERE id = :id";
+            $stmtSelect = $this->conn->prepare($querySelect);
+            $stmtSelect->bindParam(":id", $id);
+            $stmtSelect->execute();
+            $row = $stmtSelect->fetch(PDO::FETCH_ASSOC);
+
+            if($row) {
+                $filePath = "uploads/" . $row['image']; 
+                if(file_exists($filePath)) { unlink($filePath); } 
+            }
+
+            // 3. Hapus data di DB
+            $query = "DELETE FROM " . $this->table . " WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":id", $id);
+            
+            if($stmt->execute()){
+                return true; // Berhasil
+            } else {
+                return "Gagal eksekusi query delete.";
+            }
+
+        } catch (PDOException $e) {
+            return "Database Error: " . $e->getMessage();
         }
-        return false;
     }
 
     // 4. SEARCH (Untuk Live Search AJAX)
