@@ -4,8 +4,7 @@ include_once 'config/Database.php';
 include_once 'classes/Product.php';
 include_once 'classes/AdminOrder.php';
 
-// Cek sesi (Aktifkan jika fitur Login Brian sudah jadi)
-// if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header("Location: login.php"); exit; }
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header("Location: login.php"); exit; }
 
 $database = new Database();
 $db = $database->getConnection();
