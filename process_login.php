@@ -9,7 +9,7 @@ $password = $_POST['password'] ?? '';
 $auth = new Auth();
 
 if ($auth->login($username, $password)) {
-    echo json_encode([
+    echo json_encode([//kalau sukses maka status jalan ini
         'status' => 'success', 
         'message' => 'Login Berhasil!', 
         'role' => $_SESSION['role']

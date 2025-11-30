@@ -5,7 +5,7 @@ require_once 'cart.php';
 $action = $_POST['action'] ?? '';
 $cart = new Cart();
 
-// 1. ADD ITEM
+// ADD ITEM
 if ($action == 'add') {
     $id = $_POST['id'];
     $name = $_POST['name'];
@@ -16,7 +16,7 @@ if ($action == 'add') {
     echo json_encode(['status' => 'success', 'total_qty' => $cart->totalItems()]);
 }
 
-// 2. UPDATE QTY
+// UPDATE QTY
 if ($action == 'update') {
     $id = $_POST['id'];
     $qty = $_POST['qty'];
@@ -30,7 +30,7 @@ if ($action == 'update') {
     ]);
 }
 
-// 3. REMOVE ITEM
+// REMOVE ITEM
 if ($action == 'remove') {
     $id = $_POST['id'];
     
@@ -39,7 +39,7 @@ if ($action == 'remove') {
     echo json_encode([
         'status' => 'success',
         'total_sum' => number_format($cart->getTotalSum(), 0, ',', '.'),
-        'total_qty' => $cart->totalItems() // Update badge di navbar
+        'total_qty' => $cart->totalItems() //Update badge di navbar
     ]);
 }
 ?>

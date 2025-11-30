@@ -1,14 +1,14 @@
 <?php
-require_once 'database.php'; // Sesuaikan path koneksi database kamu
+require_once 'database.php'; 
 
 $db = new Database();
 $conn = $db->getConnection();
 
-// Password baru yang diinginkan
+
 $username = 'admin';
 $passwordBaru = 'admin'; 
 
-// Enkripsi password
+// enkripsi 
 $hashedPassword = password_hash($passwordBaru, PASSWORD_DEFAULT);
 
 $query = "UPDATE users SET password = :pass WHERE username = :user";

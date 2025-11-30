@@ -26,10 +26,10 @@ session_start();
             background-color: #dc3545 !important;
         }
 
-        /* PENTING: Cursor pointer agar user tahu gambar bisa diklik */
+        /* cursor pointer biar user tahu gambar bisa diklik */
         .view-details { cursor: pointer; }
 
-        /* PENTING: Agar overlay 'HABIS' tidak memblokir klik pada gambar */
+        /* biar overlay 'HABIS' tidak memblokir klik pada gambar */
         .sold-out-overlay { pointer-events: none; }
     </style>
 </head>
@@ -111,7 +111,7 @@ session_start();
     <script>
     $(document).ready(function() {
 
-        // --- SweetAlert Logout ---
+        // alert Logout
         $('#btn-logout').on('click', function(e) {
             e.preventDefault(); 
             var href = $(this).attr('href'); 
@@ -148,7 +148,7 @@ session_start();
                         $.each(response.products, function(i, product) {
                             let price = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.price);
                             
-                            // Pastikan deskripsi tidak undefined/null
+                            // kalo ga ada deskripsi kasih teks default ne
                             let desc = product.description ? product.description.replace(/"/g, '&quot;') : 'Tidak ada deskripsi.';
 
                             let buttonHtml = '';
@@ -210,7 +210,7 @@ session_start();
 
                     $('#product-grid').html(html);
 
-                    // Pagination
+                    // pagination
                     let paginationHtml = '';
                     if(response.totalPages) {
                         for (let i = 1; i <= response.totalPages; i++) {
@@ -222,7 +222,7 @@ session_start();
                 },
                 error: function(xhr, status, error) {
                     console.log("Error:", error);
-                    // Cek error di console browser
+                    // cek kalo error ke console
                     console.log(xhr.responseText); 
                     $('#product-grid').html('<div class="col-12 text-center text-danger">Gagal memuat data.</div>');
                 }
@@ -242,9 +242,9 @@ session_start();
             loadProducts(page, currentKeyword);
         });
 
-        // --- EVENT LISTENER: KLIK GAMBAR (MUNCULKAN MODAL) ---
+        // klik gambar untuk detail modal
         $(document).on('click', '.view-details', function() {
-            console.log('Gambar diklik!'); // Debugging: Cek console F12 jika ini muncul
+            console.log('Gambar diklik!'); 
 
             try {
                 let name = $(this).data('name');
@@ -255,19 +255,20 @@ session_start();
                 let rawPrice = $(this).data('rawprice');
                 let stock = $(this).data('stock');
 
-                // Isi Konten Modal
+                // isi dri modal
                 $('#modalName').text(name);
                 $('#modalDesc').text(desc);
                 $('#modalPrice').text(price);
                 $('#modalImage').attr('src', 'uploads/' + image);
 
-                // Setup tombol modal
+                // tombol Add to Cart yg ada di modalnya
                 let modalBtn = $('#modalAddToCart');
                 modalBtn.data('id', id);
                 modalBtn.data('name', name);
                 modalBtn.data('price', rawPrice);
                 modalBtn.data('image', image);
 
+                //kalo ada stock aktifin tombolnya, kalo ga ya disable lalu ada soldout
                 if(stock > 0) {
                     modalBtn.prop('disabled', false).text('Add to Cart').addClass('add-to-cart');
                 } else {
@@ -283,7 +284,7 @@ session_start();
             }
         });
 
-        // Event Add to Cart
+        //  add to cart
         $(document).on('click', '.add-to-cart', function() {
             let btn = $(this);
             $.ajax({
@@ -298,11 +299,14 @@ session_start();
                 },
                 dataType: 'json',
                 success: function(res) {
+                    //setelah kirim ke backend, dan sukses, update jumlah di icon keranjang
                     if(res.status === 'success') {
                         $('#cart-count').text(res.total_qty);
                         let originalText = btn.text();
+                        //trs ubah button sementara jadi  added
                         btn.removeClass('btn-dark').addClass('btn-success').text('Added!');
                         setTimeout(() => {
+                            //setelah 1 detik balik ke semula
                             btn.removeClass('btn-success').addClass('btn-dark').text(originalText);
                         }, 1000); 
                     }

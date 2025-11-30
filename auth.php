@@ -5,18 +5,21 @@ class auth {
     private $conn;
     private $table_name = "users";
 
-    public function __construct() {
+    public function __construct() { //buat contractor
         $database = new Database();
         $this->conn = $database->getConnection();
     }
 
+
     public function login($username, $password) {
+        //bikin query buat ngecek username di database
         $query = "SELECT id, username, password, role, nama_lengkap FROM " . $this->table_name . " WHERE username = :username LIMIT 1";
-        
+        //prepare statement
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':username', $username);
         $stmt->execute();
 
+        //kalo ada usernya maka cek passwordnya
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (password_verify($password, $row['password'])) {
@@ -31,15 +34,18 @@ class auth {
     }
 
     public function register($username,$password,$nama_lengkap){
+        //cek username ad ga
         $checkQuery = "SELECT id FROM " . $this->table_name . " WHERE username = :username";
         $stmt = $this->conn->prepare($checkQuery);
         $stmt->bindParam(':username', $username);
         $stmt->execute();
 
+        //kalo ada username yg sama jalanin ini
         if($stmt->rowCount() > 0){
             return "Username sudah digunakan, cari yang lain";
         }
 
+        //kalo gaada baru encripsi password dan simpan lalu insert
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $role = 'user';
 

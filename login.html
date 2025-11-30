@@ -64,7 +64,7 @@
     <script>
     $(document).ready(function() {
         $('#loginForm').submit(function(e) {
-            e.preventDefault(); // Mencegah form reload halaman
+            e.preventDefault(); // biar form reload halaman
 
             var username = $('#username').val();
             var password = $('#password').val();
@@ -76,7 +76,7 @@
                     username: username,
                     password: password
                 },
-                dataType: 'json', // balasan JSON
+                dataType: 'json', // tipe data JSON
                 success: function(response) {
                     if (response.status == 'success') {
                         // alert sukses
