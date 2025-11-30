@@ -29,6 +29,9 @@ class order{
             $querydetail="INSERT INTO order_details (order_id, product_id, quantity, price) VALUES (:oid, :pid, :qty, :price)";
             $stmtdetail= $this->conn->prepare($querydetail);
 
+            $queryStock = "UPDATE products SET stock = stock - :qty WHERE id = :pid";
+            $stmtStock = $this->conn->prepare($queryStock);
+
             foreach($cartItems as $item){
                 $stmtdetail->bindparam(':oid',$orderid);
                 $stmtdetail->bindparam(':pid',$item['id']);

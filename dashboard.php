@@ -211,7 +211,7 @@ function confirmLogout(event) {
         confirmButtonText: 'Ya, Logout!'
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = 'logout.php';
+            window.location.href = 'login.html';
         }
     })
 }
@@ -229,7 +229,7 @@ function deleteProduct(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             // Panggil API Hapus
-            fetch('api/admin_api.php?action=delete&id=' + id)
+            fetch('admin_api.php?action=delete&id=' + id)
             .then(response => response.json())
             .then(data => {
                 if(data.status === 'success') {
@@ -273,7 +273,7 @@ function updateStock(id, currentStock) {
             formData.append('id', id);
             formData.append('stock', newStock);
 
-            fetch('api/admin_api.php', {
+            fetch('admin_api.php', {
                 method: 'POST',
                 body: formData
             })
@@ -282,11 +282,14 @@ function updateStock(id, currentStock) {
                 if(data.status === 'success') {
                     Swal.fire('Berhasil!', 'Stok berhasil diperbarui.', 'success');
                     // Update tampilan stok di tabel secara langsung
-                    document.getElementById('stock-display-' + id).innerText = newStock;
+                    let display = document.getElementById('stock-display-' + id);
+                    if(display) display.innerText = newStock;
                     
-                    // Update tombol onclick agar angka stok terbaru tersimpan
-                    let btn = document.querySelector(`#row-${id} .btn-primary`);
-                    btn.setAttribute('onclick', `updateStock(${id}, ${newStock})`);
+                    let editBtn =document.querySelector(`#row-${id} .btn-primary`);
+                    if(editBtn) {
+                    // Ganti onclick lama dengan onclick baru yang membawa nilai stock baru
+                    editBtn.setAttribute('onclick', `updateStock(${id}, ${newStock})`);
+                        }
                 } else {
                     Swal.fire('Error!', 'Gagal update stok.', 'error');
                 }
@@ -295,20 +298,20 @@ function updateStock(id, currentStock) {
     })
 }
 
-// 4. Fitur Search (Tetap sama)
+// 4. Fitur Search 
 function searchProduct() {
     let keyword = document.getElementById('searchInput').value;
     let tbody = document.getElementById('productTableBody');
 
-    fetch('api/admin_api.php?action=search&keyword=' + keyword)
+    fetch('admin_api.php?action=search&keyword=' + keyword)
     .then(response => response.json())
     .then(data => {
         let html = '';
         if(data.length > 0) {
             data.forEach(item => {
                 let price = new Intl.NumberFormat('id-ID').format(item.price);
-                // Tambahkan kolom stock di hasil pencarian juga
-                let stock = item.stock ? item.stock : 0;
+                // Pastikan kolom stock ada, jika null/undefined set ke 0
+                let stock = (item.stock !== undefined && item.stock !== null) ? item.stock : 0;
 
                 html += `<tr id='row-${item.id}'>
                             <td><img src='uploads/${item.image}' class='img-thumbnail' style='width: 60px; height: 60px; object-fit: cover;'></td>

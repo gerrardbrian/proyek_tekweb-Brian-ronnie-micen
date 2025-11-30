@@ -130,20 +130,46 @@ session_start();
                         $.each(response.products, function(i, product) {
                             let price = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.price);
                             
+
+                            let buttonHtml = '';
+                            let imageOverlay = '';
+
+                            if (product.stock > 0){
+                                buttonHtml =`
+                                <button class="btn btn-dark w-100 add-to-cart" 
+                                        data-id="${product.id}" 
+                                        data-name="${product.name}" 
+                                        data-price="${product.price}" 
+                                        data-image="${product.image}">
+                                        Add to Cart
+                                    </button>`;
+                            }else{
+                                buttonHtml=`
+                                <button class="btn btn-secondary w-100" disabled style="cursor: not-allowed;">
+                                        SOLD OUT
+                                    </button>`;
+
+                                imageOverlay=`
+                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
+                                         style="background: rgba(0,0,0,0.5); color: white; font-weight: bold; letter-spacing: 2px;">
+                                        HABIS
+                                    </div>`;
+                            }
+
                             html += `
                             <div class="col-md-4 mb-4">
-                                <div class="card product-card h-100">
-                                    <img src="uploads/${product.image}" class="card-img-top" style="height:250px; object-fit:cover;" alt="${product.name}">
+                                <div class="card product-card h-100 position-relative">
+                                    <div class="position-relative">
+                                        <img src="uploads/${product.image}" class="card-img-top" style="height:250px; object-fit:cover;" alt="${product.name}">
+                                        ${imageOverlay} 
+                                    </div>
                                     <div class="card-body text-center">
                                         <h5 class="card-title">${product.name}</h5>
-                                        <p class="card-text text-warning fw-bold">${price}</p>
-                                        <button class="btn btn-dark w-100 add-to-cart" 
-                                            data-id="${product.id}" 
-                                            data-name="${product.name}" 
-                                            data-price="${product.price}" 
-                                            data-image="${product.image}">
-                                            Add to Cart
-                                        </button>
+                                        <div class="d-flex justify-content-between align-items-center mb-2 px-3">
+                                            <p class="card-text text-warning fw-bold mb-0">${price}</p>
+                                            <small class="text-muted">Stok: ${product.stock}</small>
+                                        </div>
+                                        ${buttonHtml}
                                     </div>
                                 </div>
                             </div>`;
