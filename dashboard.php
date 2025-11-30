@@ -1,15 +1,15 @@
 <?php
 session_start();
-include_once 'config/Database.php';
-include_once 'classes/Product.php';
-include_once 'classes/AdminOrder.php';
+include_once 'database.php';
+include_once 'product.php';
+include_once 'admin_order.php';
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header("Location: login.php"); exit; }
 
-$database = new Database();
+$database = new database();
 $db = $database->getConnection();
-$productObj = new Product($db);
-$orderObj = new AdminOrder($db);
+$productObj = new product($db);
+$orderObj = new admin_order($db);
 
 // Handle Form Submit (Tambah Produk)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
