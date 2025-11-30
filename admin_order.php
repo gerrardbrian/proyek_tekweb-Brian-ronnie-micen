@@ -1,5 +1,5 @@
 <?php
-class AdminOrder {
+class admin_order {
     private $conn;
     private $table = "orders";
 
