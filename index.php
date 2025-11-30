@@ -22,10 +22,15 @@ session_start();
         .search-container { width: 40%; }
         @media (max-width: 768px) { .search-container { width: 100%; margin: 10px 0; } }
         
-        /* Custom SweetAlert Style agar sesuai tema */
         div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
-            background-color: #dc3545 !important; /* Warna Merah Danger */
+            background-color: #dc3545 !important;
         }
+
+        /* PENTING: Cursor pointer agar user tahu gambar bisa diklik */
+        .view-details { cursor: pointer; }
+
+        /* PENTING: Agar overlay 'HABIS' tidak memblokir klik pada gambar */
+        .sold-out-overlay { pointer-events: none; }
     </style>
 </head>
 <body class="bg-light">
@@ -81,55 +86,70 @@ session_start();
         </nav>
     </div>
 
+    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalName">Detail Produk</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="modalImage" class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
+                    <h4 class="text-warning fw-bold mb-3" id="modalPrice">Rp 0</h4>
+                    <p class="text-muted text-start px-3" id="modalDesc">Deskripsi produk...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-dark" id="modalAddToCart">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
     $(document).ready(function() {
 
-        // --- 3. LOGIKA SWEETALERT UNTUK LOGOUT ---
+        // --- SweetAlert Logout ---
         $('#btn-logout').on('click', function(e) {
-            e.preventDefault(); // Mencegah link langsung pindah halaman
-            
-            var href = $(this).attr('href'); // Ambil link tujuan (login.html)
+            e.preventDefault(); 
+            var href = $(this).attr('href'); 
 
             Swal.fire({
                 title: 'Yakin ingin keluar?',
                 text: "Sesi Anda akan diakhiri.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33', // Merah
-                cancelButtonColor: '#3085d6', // Biru
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Ya, Logout!',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Jika user klik Ya, pindahkan halaman
                     window.location.href = href;
                 }
             });
         });
-        // ------------------------------------------
 
-        // buat menyimpan kata kunci pencarian
         var currentKeyword = ''; 
         
-        // Load Produk ---
         function loadProducts(page, search = '') { 
             
             $.ajax({
                 url: 'api_catalog.php',
                 type: 'GET',
-                data: { 
-                    page: page,
-                    search: search 
-                },
+                data: { page: page, search: search },
                 dataType: 'json',
                 success: function(response) {
                     let html = '';
                     
                     if(response.products && response.products.length > 0){
-                
                         $.each(response.products, function(i, product) {
                             let price = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.price);
                             
+                            // Pastikan deskripsi tidak undefined/null
+                            let desc = product.description ? product.description.replace(/"/g, '&quot;') : 'Tidak ada deskripsi.';
 
                             let buttonHtml = '';
                             let imageOverlay = '';
@@ -142,31 +162,42 @@ session_start();
                                         data-price="${product.price}" 
                                         data-image="${product.image}">
                                         Add to Cart
-                                    </button>`;
+                                </button>`;
                             }else{
                                 buttonHtml=`
                                 <button class="btn btn-secondary w-100" disabled style="cursor: not-allowed;">
                                         SOLD OUT
-                                    </button>`;
-
+                                </button>`;
+                                
+                                // Tambahkan class 'sold-out-overlay' agar klik tembus ke gambar
                                 imageOverlay=`
-                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
-                                         style="background: rgba(0,0,0,0.5); color: white; font-weight: bold; letter-spacing: 2px;">
-                                        HABIS
-                                    </div>`;
+                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center sold-out-overlay" 
+                                     style="background: rgba(0,0,0,0.5); color: white; font-weight: bold; letter-spacing: 2px;">
+                                     HABIS
+                                </div>`;
                             }
 
                             html += `
                             <div class="col-md-4 mb-4">
                                 <div class="card product-card h-100 position-relative">
                                     <div class="position-relative">
-                                        <img src="uploads/${product.image}" class="card-img-top" style="height:250px; object-fit:cover;" alt="${product.name}">
+                                        <img src="uploads/${product.image}" class="card-img-top view-details" 
+                                             style="height:250px; object-fit:cover;" 
+                                             alt="${product.name}"
+                                             data-name="${product.name}"
+                                             data-desc="${desc}" 
+                                             data-price="${price}"
+                                             data-image="${product.image}"
+                                             data-id="${product.id}"
+                                             data-stock="${product.stock}"
+                                             data-rawprice="${product.price}"
+                                        >
                                         ${imageOverlay} 
                                     </div>
                                     <div class="card-body text-center">
                                         <h5 class="card-title">${product.name}</h5>
-                                        <div class="d-flex justify-content-between align-items-center mb-2 px-3">
-                                            <p class="card-text text-warning fw-bold mb-0">${price}</p>
+                                        <div class="d-flex justify-content-center align-items-center mb-2 px-3">
+                                            <p class="card-text text-warning fw-bold mb-0 fs-5">${price}</p>
                                         </div>
                                         ${buttonHtml}
                                     </div>
@@ -179,6 +210,7 @@ session_start();
 
                     $('#product-grid').html(html);
 
+                    // Pagination
                     let paginationHtml = '';
                     if(response.totalPages) {
                         for (let i = 1; i <= response.totalPages; i++) {
@@ -190,31 +222,70 @@ session_start();
                 },
                 error: function(xhr, status, error) {
                     console.log("Error:", error);
-                    $('#product-grid').html('<div class="col-12 text-center text-danger">Gagal memuat data. Cek Console (F12) & Network tab.</div>');
+                    // Cek error di console browser
+                    console.log(xhr.responseText); 
+                    $('#product-grid').html('<div class="col-12 text-center text-danger">Gagal memuat data.</div>');
                 }
             });
         }
 
-        //Load halaman pertama saat website dibuka
         loadProducts(1, '');
 
-        //event listener: Search (Saat mengetik)
         $('#search-input').on('keyup', function() {
             currentKeyword = $(this).val(); 
             loadProducts(1, currentKeyword); 
         });
 
-        // event listener klik pagination
         $(document).on('click', '.page-link', function(e) {
             e.preventDefault(); 
             let page = $(this).data('page');
             loadProducts(page, currentKeyword);
         });
 
-        // event listener: Add to Cart
+        // --- EVENT LISTENER: KLIK GAMBAR (MUNCULKAN MODAL) ---
+        $(document).on('click', '.view-details', function() {
+            console.log('Gambar diklik!'); // Debugging: Cek console F12 jika ini muncul
+
+            try {
+                let name = $(this).data('name');
+                let desc = $(this).data('desc');
+                let price = $(this).data('price');
+                let image = $(this).data('image');
+                let id = $(this).data('id');
+                let rawPrice = $(this).data('rawprice');
+                let stock = $(this).data('stock');
+
+                // Isi Konten Modal
+                $('#modalName').text(name);
+                $('#modalDesc').text(desc);
+                $('#modalPrice').text(price);
+                $('#modalImage').attr('src', 'uploads/' + image);
+
+                // Setup tombol modal
+                let modalBtn = $('#modalAddToCart');
+                modalBtn.data('id', id);
+                modalBtn.data('name', name);
+                modalBtn.data('price', rawPrice);
+                modalBtn.data('image', image);
+
+                if(stock > 0) {
+                    modalBtn.prop('disabled', false).text('Add to Cart').addClass('add-to-cart');
+                } else {
+                    modalBtn.prop('disabled', true).text('SOLD OUT').removeClass('add-to-cart');
+                }
+
+                // Tampilkan Modal
+                var myModal = new bootstrap.Modal(document.getElementById('productModal'));
+                myModal.show();
+            } catch (error) {
+                console.error("Error menampilkan modal:", error);
+                alert("Terjadi kesalahan saat membuka detail produk.");
+            }
+        });
+
+        // Event Add to Cart
         $(document).on('click', '.add-to-cart', function() {
             let btn = $(this);
-            
             $.ajax({
                 url: 'api_cart.php',
                 type: 'POST',
@@ -229,20 +300,11 @@ session_start();
                 success: function(res) {
                     if(res.status === 'success') {
                         $('#cart-count').text(res.total_qty);
-                        
                         let originalText = btn.text();
                         btn.removeClass('btn-dark').addClass('btn-success').text('Added!');
                         setTimeout(() => {
                             btn.removeClass('btn-success').addClass('btn-dark').text(originalText);
                         }, 1000); 
-
-                        // Opsi: Bisa tambah SweetAlert kecil di sini juga untuk notifikasi sukses add cart
-                        /*
-                        const Toast = Swal.mixin({
-                          toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true
-                        })
-                        Toast.fire({ icon: 'success', title: 'Produk masuk keranjang' })
-                        */
                     }
                 },
                 error: function() {

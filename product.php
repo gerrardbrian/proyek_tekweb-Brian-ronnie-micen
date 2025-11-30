@@ -1,5 +1,5 @@
 <?php
-class Product {
+class product {
     private $conn;
     private $table = "products";
 
@@ -15,34 +15,37 @@ class Product {
         return $stmt;
     }
 
-    // 2. CREATE (Dengan Upload Foto) [cite: 24, 29]
-    public function create($name, $price, $desc, $file) {
+    // 2. CREATE (PERBAIKAN: Menggunakan Syntax PDO yang Benar)
+    public function create($name, $price, $desc, $stock, $image) {
         // Setup Upload
-        $target_dir = "../uploads/";
-        // Buat nama file unik agar tidak bentrok
-        $filename = time() . "_" . basename($file["name"]);
-        $target_file = $target_dir . $filename;
+        $target_dir = "uploads/";
+        $target_file = $target_dir . basename($image["name"]);
+        move_uploaded_file($image["tmp_name"], $target_file);
+        $image_name = $image["name"];
         
-        // Validasi sederhana (hanya izinkan gambar)
-        $check = getimagesize($file["tmp_name"]);
-        if($check === false) { return false; }
+        // Query menggunakan tanda tanya (?) sebagai placeholder
+        $query = "INSERT INTO " . $this->table . " (name, price, description, stock, image) VALUES (?, ?, ?, ?, ?)";
+    
+        $stmt = $this->conn->prepare($query);
 
-        if (move_uploaded_file($file["tmp_name"], $target_file)) {
-            // Jika upload sukses, simpan ke DB
-            $query = "INSERT INTO " . $this->table . " (name, price, description, image) VALUES (:name, :price, :desc, :image)";
-            $stmt = $this->conn->prepare($query);
+        // DI SINI PERUBAHANNYA:
+        // Hapus bind_param (itu punya MySQLi).
+        // Masukkan data langsung ke dalam execute() berupa array urut.
+        $data = [
+            htmlspecialchars(strip_tags($name)),
+            htmlspecialchars(strip_tags($price)),
+            htmlspecialchars(strip_tags($desc)),
+            htmlspecialchars(strip_tags($stock)),
+            htmlspecialchars(strip_tags($image_name))
+        ];
 
-            $stmt->bindParam(":name", $name);
-            $stmt->bindParam(":price", $price);
-            $stmt->bindParam(":desc", $desc);
-            $stmt->bindParam(":image", $filename);
-
-            return $stmt->execute();
+        if($stmt->execute($data)) {
+            return true;
         }
         return false;
     }
 
-    // 3. DELETE (Untuk AJAX) [cite: 31]
+    // 3. DELETE (Untuk AJAX)
     public function delete($id) {
         // Ambil nama file dulu untuk dihapus dari folder
         $querySelect = "SELECT image FROM " . $this->table . " WHERE id = :id";
@@ -52,25 +55,29 @@ class Product {
         $row = $stmtSelect->fetch(PDO::FETCH_ASSOC);
 
         if($row) {
-            $filePath = "../uploads/" . $row['image'];
-            if(file_exists($filePath)) { unlink($filePath); } // Hapus file fisik
+            $filePath = "uploads/" . $row['image']; // Pastikan path sesuai
+            if(file_exists($filePath)) { unlink($filePath); } 
         }
 
         // Hapus data di DB
         $query = "DELETE FROM " . $this->table . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
-        return $stmt->execute();
+        
+        if($stmt->execute()){
+            return true;
+        }
+        return false;
     }
 
-    // 4. SEARCH (Untuk Live Search AJAX) [cite: 32]
+    // 4. SEARCH (Untuk Live Search AJAX)
     public function search($keyword) {
         $query = "SELECT * FROM " . $this->table . " WHERE name LIKE :keyword ORDER BY id DESC";
         $stmt = $this->conn->prepare($query);
         $keyword = "%{$keyword}%";
         $stmt->bindParam(":keyword", $keyword);
         $stmt->execute();
-        return $stmt;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); // Mengembalikan array asosiatif agar mudah di-loop di JS
     }
 }
 ?>
