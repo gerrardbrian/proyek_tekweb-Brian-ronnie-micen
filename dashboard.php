@@ -37,11 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
     
     <style>
         body { background-color: #f8f9fa; }
-        .sidebar { min-height: 100vh; background-color: #343a40; color: white; }
+        .sidebar { min-height: 100vh; background-color: #000000; color #d4af37; border-right: 1px solid #d4af37; }
         .sidebar a { color: #adb5bd; text-decoration: none; padding: 10px; display: block; }
-        .sidebar a:hover { background-color: #495057; color: white; border-radius: 5px; }
-        .sidebar .active { background-color: #0d6efd; color: white; border-radius: 5px; }
-        .card { border: none; shadow-sm; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+        .sidebar a:hover { background-color: #d4af37;; color: #000; border-radius: 5px; }
+        .sidebar .active { background-color: #d4af37; color: #000; font-weight: bold; border-radius: 5px; }
+        .card { border: 1px solid #ccc; box-shadow: none; }
+        .card-header-lux{background-color:#000; color:#d4af37; font-weight:bold; text-transform:uppercase;}
+        .btn-lux{background-color: #d4af37; color: #000; font-weight:bold; border:1px soloid #d4af37}
+        .btn-lux:hover{background-color: #b5952f;color: #fff}
     </style>
 </head>
 <body>
@@ -74,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
             <?php endif; ?>
 
             <div class="card mb-4" id="products">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header card-header-lux p-3">
                     <h5 class="mb-0">Tambah Produk Baru</h5>
                 </div>
                 <div class="card-body">
@@ -101,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
                             <label class="form-label">Foto Produk</label>
                             <input type="file" name="image" class="form-control" accept="image/*" required>
                         </div>
-                        <button type="submit" name="submit_product" class="btn btn-success">
+                        <button type="submit" name="submit_product" class="btn btn-lux ">
                             <i class="fas fa-upload me-1"></i> Upload Produk
                         </button>
                     </form>
