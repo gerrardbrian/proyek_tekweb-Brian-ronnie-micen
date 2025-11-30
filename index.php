@@ -167,7 +167,6 @@ session_start();
                                         <h5 class="card-title">${product.name}</h5>
                                         <div class="d-flex justify-content-between align-items-center mb-2 px-3">
                                             <p class="card-text text-warning fw-bold mb-0">${price}</p>
-                                            <small class="text-muted">Stok: ${product.stock}</small>
                                         </div>
                                         ${buttonHtml}
                                     </div>
