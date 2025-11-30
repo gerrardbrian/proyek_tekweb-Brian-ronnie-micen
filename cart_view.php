@@ -10,13 +10,39 @@ $items = $cart->getContent();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keranjang Belanja | Lux Brand</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <style>
         body { background-color: #f8f9fa; font-family: 'Times New Roman', serif; }
         .table-cart th { background-color: #1a1a1a; color: #d4af37; border: none; }
         .btn-luxury { background-color: #000; color: #fff; border: 1px solid #000; }
         .btn-luxury:hover { background-color: #d4af37; color: #000; border-color: #d4af37; }
         .cart-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
+
+        /* --- 2. CSS Khusus untuk Meniru Tampilan Gambar Anda --- */
+        /* Mengubah font popup menjadi Serif agar mirip gambar */
+        div:where(.swal2-container) .swal2-title {
+            font-family: 'Times New Roman', serif !important;
+            color: #555 !important; /* Warna abu gelap seperti di gambar */
+            font-weight: bold;
+            font-size: 2rem;
+        }
+        
+        div:where(.swal2-container) .swal2-html-container {
+            font-family: 'Times New Roman', serif !important;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Tombol OK menjadi Hitam (Luxury) */
+        div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
+            background-color: #000 !important;
+            color: #d4af37 !important;
+            border-radius: 5px; 
+            box-shadow: none !important;
+        }
     </style>
 </head>
 <body>
@@ -119,18 +145,15 @@ $items = $cart->getContent();
 
     <script>
     $(document).ready(function() {
-        // Update Quantity
+        // Update Quantity (Tetap sama)
         $('.qty-input').on('change', function() {
             let id = $(this).data('id');
             let qty = $(this).val();
             let price = $(this).data('price');
         
-
-            // Update Subtotal di layar (biar cepat)
             let rowSubtotal = price * qty;
             $('#subtotal-' + id).text(new Intl.NumberFormat('id-ID').format(rowSubtotal));
 
-            // Kirim ke Backend
             $.ajax({
                 url: 'api_cart.php',
                 type: 'POST',
@@ -142,52 +165,107 @@ $items = $cart->getContent();
             });
         });
 
-        // Remove Item
+        // Remove Item (Menggunakan SweetAlert konfirmasi hapus)
         $('.btn-remove').on('click', function() {
-            if(!confirm('Hapus item ini?')) return;
             let id = $(this).data('id');
 
-            $.ajax({
-                url: 'api_cart.php',
-                type: 'POST',
-                data: { action: 'remove', id: id },
-                dataType: 'json',
-                success: function(response) {
-                    $('#row-' + id).fadeOut(300, function() { 
-                        $(this).remove(); 
-                        if(response.total_sum == 0) location.reload(); 
+            Swal.fire({
+                title: 'Hapus Item?',
+                text: "Barang ini akan dihapus dari keranjang.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#000'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: 'api_cart.php',
+                        type: 'POST',
+                        data: { action: 'remove', id: id },
+                        dataType: 'json',
+                        success: function(response) {
+                            $('#row-' + id).fadeOut(300, function() { 
+                                $(this).remove(); 
+                                if(response.total_sum == 0) location.reload(); 
+                            });
+                            $('#grand-total').text(response.total_sum);
+                        }
                     });
-                    $('#grand-total').text(response.total_sum);
                 }
             });
         });
 
+        // --- 3. Checkout dengan Tampilan Sesuai Gambar ---
         $('#btn-checkout').on('click', function() {
             
-            if(!confirm("Apakah anda yakin ingin menyelesaikan pembelian?")) return;
+            // Konfirmasi awal
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: "Apakah Anda yakin ingin menyelesaikan pembelian?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#000', // Hitam Luxury
+                cancelButtonColor: '#666',
+                confirmButtonText: 'Ya, Beli',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                
+                if (result.isConfirmed) {
+                    let btn = $('#btn-checkout');
+                    let originalText = btn.text();
+                    
+                    // Tampilkan Loading
+                    btn.prop('disabled', true).text('Memproses...');
+                    Swal.fire({
+                        title: 'Memproses...',
+                        didOpen: () => { Swal.showLoading() }
+                    });
 
-            let btn = $(this);
-            let origiinalText=btn.text();
-            btn.prop('disabled', true).text('Memproses Pesanan... 😃');
+                    $.ajax({
+                        url: 'api_checkout.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function(response){
+                            if (response.status == 'success'){
+                                // TAMPILAN SUKSES SESUAI GAMBAR
+                                Swal.fire({
+                                    icon: 'success', // Ini yang membuat ikon centang hijau animasi
+                                    title: 'Terima Kasih', // Judul besar serif
+                                    text: 'Pesanan Anda berhasil diproses!', // Text bawah
+                                    confirmButtonText: 'OK',
+                                    padding: '2em',
+                                    customClass: {
+                                        popup: 'animated fadeInDown' // Animasi halus
+                                    }
+                                }).then(() => {
+                                    window.location.href = 'index.php';
+                                });
 
-            $.ajax({
-                url: 'api_checkout.php',
-                type:'POST',
-                dataType:'json',
-                success: function(response){
-                    if (response.status == 'success'){
-                        alert(response.message);
-                        window.location.href = 'index.php';
-
-                    }
-                    btn.prop('disabled',false).text(origiinalText);
-                },
-                error: function(){
-                    alert('Terjadi kesalahan saat memproses pesanan. Silahkan coba lagi.');
-                    btn.prop('disabled',false).text(origiinalText);
+                            } else {
+                                // Tampilan Gagal
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: response.message,
+                                    confirmButtonColor: '#000'
+                                });
+                                btn.prop('disabled', false).text(originalText);
+                            }
+                        },
+                        error: function(){
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Terjadi kesalahan sistem.',
+                                confirmButtonColor: '#000'
+                            });
+                            btn.prop('disabled', false).text(originalText);
+                        }
+                    });
                 }
-            })
-
+            });
         });
     });
     </script>
