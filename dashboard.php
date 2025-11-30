@@ -1,16 +1,15 @@
 <?php
 session_start();
-include_once 'config/Database.php';
-include_once 'classes/Product.php';
-include_once 'classes/AdminOrder.php';
+include_once 'database.php';
+include_once 'product.php';
+include_once 'admin_order.php';
 
-// Cek sesi (Aktifkan jika fitur Login Brian sudah jadi)
-// if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header("Location: login.php"); exit; }
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header("Location: login.php"); exit; }
 
-$database = new Database();
+$database = new database();
 $db = $database->getConnection();
-$productObj = new Product($db);
-$orderObj = new AdminOrder($db);
+$productObj = new product($db);
+$orderObj = new admin_order($db);
 
 // Handle Form Submit (Tambah Produk)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
@@ -31,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Ronnie</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -180,8 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <script>
 function deleteProduct(id) {
     if(confirm('Yakin ingin menghapus barang ini secara permanen?')) {

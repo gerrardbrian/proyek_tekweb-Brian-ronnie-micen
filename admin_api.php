@@ -1,6 +1,6 @@
 <?php
-include_once '../config/database.php';
-include_once '../classes/product.php';
+include_once 'database.php';
+include_once 'product.php';
 
 $database = new Database();
 $db = $database->getConnection();
