@@ -3,61 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Lux Brand</title>
+    <title>Login - Luxury Brand</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        body { background-color: #eef1f5; }
-        .login-container { margin-top: 100px; }
-        .card-custom {
-            border: 1px solid #ccc; 
-            border-radius: 0px; 
-            background-color: white;
+        body { background-color: #f3f4f6; }
+        .lux-card {
+            border: 1px solid #d4af37; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .brand-title {
-            font-family: 'Times New Roman', serif;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .btn-lux {
+            background-color: #000; 
+            color: #d4af37; 
+            border: 1px solid #d4af37;
+        }
+        .btn-lux:hover {
+            background-color: #d4af37; 
+            color: #000;
         }
     </style>
 </head>
-<body>
+<body class="h-screen flex items-center justify-center font-serif">
 
-    <div class="container login-container">
+    <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-5 col-lg-4">
-                
-                <div id="alert-message" class="alert alert-danger d-none" role="alert"></div>
-
-                <div class="card card-custom p-4">
+                <div class="card lux-card p-4 bg-white rounded-lg">
                     <div class="text-center mb-4">
-                        <h3 class="brand-title">Lux Brand</h3>
-                        <p class="text-muted small">Silahkan login untuk lanjut</p>
+                        <h2 class="text-2xl font-bold uppercase tracking-widest text-gray-800">LUX BRAND</h2>
+                        <p class="text-sm text-gray-500 mt-2">Sign in to your exclusive account</p>
                     </div>
 
                     <form id="loginForm">
                         <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control w-100" id="username" name="username" required>
+                            <label for="username" class="form-label text-sm font-semibold">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="Enter your username">
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control w-100" id="password" name="password" required>
+                            <label for="password" class="form-label text-sm font-semibold">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password">
                         </div>
                         
-                        <button type="submit" class="btn btn-dark w-100 mt-3 rounded-0">
-                            LOGIN
+                        <button type="submit" class="btn btn-lux w-100 py-2 mt-3 font-bold uppercase tracking-wide transition-all duration-300">
+                            Login
                         </button>
                     </form>
                     
-                    <div class="text-center mt-3">
-                        <small>Belum punya akun? <a href="register.html" class="text-decoration-none text-black fw-bold">Daftar</a></small>
+                    <div class="text-center mt-4">
+                        <small>Don't have an account? <a href="register.html" class="text-dark fw-bold">Register</a></small>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -65,33 +64,57 @@
     <script>
     $(document).ready(function() {
         $('#loginForm').submit(function(e) {
-            e.preventDefault(); 
+            e.preventDefault(); // Mencegah form reload halaman
+
             var username = $('#username').val();
             var password = $('#password').val();
-            
-            $('#alert-message').addClass('d-none').removeClass('alert-success alert-danger');
 
             $.ajax({
                 url: 'process_login.php',
                 type: 'POST',
-                data: { username: username, password: password },
-                dataType: 'json',
+                data: {
+                    username: username,
+                    password: password
+                },
+                dataType: 'json', // balasan JSON
                 success: function(response) {
                     if (response.status == 'success') {
-                        $('#alert-message').text(response.message).addClass('alert-success').removeClass('d-none');
-                        setTimeout(function() {
-                            // Logic redirect
-                            if (response.role == 'admin') { window.location.href = 'admin_dashboard.php'; } 
-                            else { window.location.href = 'index.php'; }
-                        }, 1000);
+                        // alert sukses
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Welcome Back',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            //  redirect ke halaman sesuai dri peran
+                            if (response.role == 'admin') {
+                                window.location.href = 'dashboard.php';
+                            } else {
+                                window.location.href = 'index.php';
+                            }
+                        });
                     } else {
-                        $('#alert-message').text(response.message).addClass('alert-danger').removeClass('d-none');
+                        // alert gagal
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Access Denied',
+                            text: response.message,
+                            confirmButtonColor: '#000'
+                        });
                     }
                 },
-                error: function() { alert('Gagal menghubungi server'); }
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan pada server.'
+                    });
+                }
             });
         });
     });
     </script>
+
 </body>
 </html>

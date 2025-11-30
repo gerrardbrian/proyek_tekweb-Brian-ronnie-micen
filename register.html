@@ -3,76 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Akun - Lux Brand</title>
+    <title>Register - Luxury Brand</title>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* Style Konsisten dengan Login */
-        body { 
-            background-color: #eef1f5; 
+        body { background-color: #f3f4f6; }
+        
+        .lux-card {
+            border: 1px solid #d4af37;  /*border warna emas*/
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .register-container { 
-            margin-top: 50px; 
-            margin-bottom: 50px; 
+        
+        .btn-lux {
+            background-color: #000; 
+            color: #d4af37; 
+            border: 1px solid #d4af37;
         }
-        .card-custom {
-            border: 1px solid #ccc;
-            border-radius: 0px; /* Desain kotak */
-            background-color: white;
-        }
-        .brand-title {
-            font-family: 'Times New Roman', serif;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        
+        .btn-lux:hover {
+            background-color: #d4af37; 
+            color: #000;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center font-serif py-5">
 
-    <div class="container register-container">
+    <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 
-                <div id="alert-message" class="alert d-none" role="alert"></div>
-
-                <div class="card card-custom p-4">
+                <div class="card lux-card p-4 bg-white rounded-lg">
                     <div class="text-center mb-4">
-                        <h3 class="brand-title">Join Lux Brand</h3>
-                        <p class="text-muted small">Buat akun baru untuk berbelanja</p>
+                        <h2 class="text-2xl font-bold uppercase tracking-widest text-gray-800">JOIN LUX BRAND</h2>
+                        <p class="text-sm text-gray-500 mt-2">Create your exclusive account</p>
                     </div>
 
                     <form id="registerForm">
                         <div class="mb-3">
-                            <label class="form-label">Nama Lengkap</label>
-                            <input type="text" class="form-control" name="nama_lengkap" required>
+                            <label class="form-label text-sm font-semibold">Nama Lengkap</label>
+                            <input type="text" class="form-control" name="nama_lengkap" required placeholder="Full Name">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Username</label>
-                            <input type="text" class="form-control" name="username" required>
+                            <label class="form-label text-sm font-semibold">Username</label>
+                            <input type="text" class="form-control" name="username" required placeholder="Choose a username">
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" class="form-control" id="pass" name="password" required>
+                                <label class="form-label text-sm font-semibold">Password</label>
+                                <input type="password" class="form-control" id="pass" name="password" required placeholder="Password">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Ulangi Password</label>
-                                <input type="password" class="form-control" id="confirm_pass" required>
+                                <label class="form-label text-sm font-semibold">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirm_pass" required placeholder="Repeat Password">
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-dark w-100 mt-3 rounded-0">
-                            DAFTAR SEKARANG
+                        <button type="submit" class="btn btn-lux w-100 py-2 mt-3 font-bold uppercase tracking-wide transition-all duration-300">
+                            REGISTER NOW
                         </button>
                     </form>
                     
-                    <div class="text-center mt-3">
-                        <small>Sudah punya akun? <a href="login.html" class="text-decoration-none text-black fw-bold">Login di sini</a></small>
+                    <div class="text-center mt-4">
+                        <small>Already a member?  <a href="login.html" class="text-dark fw-bold">Login</a></small>
                     </div>
                 </div>
 
@@ -85,50 +83,60 @@
         $('#registerForm').submit(function(e) {
             e.preventDefault(); 
 
-            // Ambil nilai password untuk validasi di sisi client
+            // Ambil nilai password untuk validasi
             var pass = $('#pass').val();
             var confirm = $('#confirm_pass').val();
 
-            // 1. Validasi Password Sama/Tidak
+            // 1. Validasi Password Client-Side dengan SweetAlert
             if(pass !== confirm) {
-                $('#alert-message').text("Konfirmasi password tidak cocok!")
-                                 .addClass('alert-danger')
-                                 .removeClass('d-none alert-success');
-                return; // Berhenti di sini, jangan kirim data
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Password Mismatch',
+                    text: 'Konfirmasi password tidak cocok!',
+                    confirmButtonColor: '#000'
+                });
+                return; // Stop proses
             }
 
             // 2. Kirim AJAX ke Backend
             $.ajax({
-                url: 'process_register.php', // Pastikan file PHP backend sudah ada
+                url: 'process_register.php', 
                 type: 'POST',
-                data: $(this).serialize(), // Otomatis ambil semua input name="..."
+                data: $(this).serialize(), 
                 dataType: 'json',
                 success: function(response) {
                     if (response.status == 'success') {
-                        // Jika Sukses
-                        $('#alert-message').text(response.message)
-                                         .addClass('alert-success')
-                                         .removeClass('d-none alert-danger');
-                        
-                        // Reset form jadi kosong lagi
-                        $('#registerForm')[0].reset();
-
-                        // Redirect ke Login page setelah 1 detik
-                        setTimeout(function() {
-                            window.location.href = 'login.html';
-                        }, 1000);
+                        // Alert Sukses (Gaya Luxury)
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Account Created',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#registerForm')[0].reset();
+                            window.location.href = 'login.html'; // Redirect ke login.html
+                        });
 
                     } else {
-                        // Jika Gagal (misal username sudah ada)
-                        $('#alert-message').text(response.message)
-                                         .addClass('alert-danger')
-                                         .removeClass('d-none alert-success');
-                        
+                        // Alert Gagal 
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Registration Failed',
+                            text: response.message,
+                            confirmButtonColor: '#000'
+                        });
+                        // Reset 
                         $('#registerForm')[0].reset();
                     }
                 },
                 error: function() {
-                    alert('Error: Gagal menghubungi server backend.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'System Error',
+                        text: 'Gagal menghubungi server backend.',
+                        confirmButtonColor: '#000'
+                    });
                 }
             });
         });
