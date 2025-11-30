@@ -82,20 +82,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nama Barang</label>
-                                <input type="text" name="name" class="form-control" placeholder="Contoh: Sepatu Nike" required>
+                                <input type="text" name="name" class="form-control" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Harga (Rp)</label>
-                                <input type="number" name="price" class="form-control" placeholder="Contoh: 150000" required>
+                                <input type="number" name="price" class="form-control"  required>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Stok Awal</label>
-                            <input type="number" name="stock" class="form-control" placeholder="Jumlah stok..." required>
+                            <input type="number" name="stock" class="form-control"  required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
-                            <textarea name="desc" class="form-control" rows="2" placeholder="Detail produk..."></textarea>
+                            <textarea name="desc" class="form-control" rows="2" required></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Foto Produk</label>
