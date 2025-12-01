@@ -21,7 +21,7 @@ $items = $cart->getContent();
         .btn-luxury:hover { background-color: #d4af37; color: #000; border-color: #d4af37; }
         .cart-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
 
-        /* --- 2. CSS Khusus untuk Meniru Tampilan Gambar Anda --- */
+        /* --- 2. CSS Khusus untuk Meniru Tampilan Gambar --- */
         /* Mengubah font popup menjadi Serif agar mirip gambar */
         div:where(.swal2-container) .swal2-title {
             font-family: 'Times New Roman', serif !important;
