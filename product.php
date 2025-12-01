@@ -29,11 +29,11 @@ class product {
 
         
         $data = [
-            htmlspecialchars(strip_tags($name)),
-            htmlspecialchars(strip_tags($price)),
-            htmlspecialchars(strip_tags($desc)),
-            htmlspecialchars(strip_tags($stock)),
-            htmlspecialchars(strip_tags($image_name))
+            strip_tags($name),
+            strip_tags($price),
+            strip_tags($desc),
+            strip_tags($stock),
+            strip_tags($image_name)
         ];
 
         if($stmt->execute($data)) {
