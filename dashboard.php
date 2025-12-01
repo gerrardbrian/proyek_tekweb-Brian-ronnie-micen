@@ -201,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_product'])) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
 <script>
-// 1. Fitur Logout dengan SweetAlert
+// 1. Logout
 function confirmLogout(event) {
     event.preventDefault(); // Mencegah link langsung jalan
     Swal.fire({
@@ -219,7 +219,7 @@ function confirmLogout(event) {
     })
 }
 
-// 2. FUNGSI HAPUS (Update untuk menampilkan pesan error spesifik)
+// 2. FUNGSI HAPUS 
 function deleteProduct(id) {
     Swal.fire({
         title: 'Hapus Barang?',
@@ -248,7 +248,7 @@ function deleteProduct(id) {
                         setTimeout(() => row.remove(), 500);
                     }
                 } else {
-                    // TAMPILKAN PESAN ERROR DARI SERVER DI SINI
+                    // TAMPILKAN PESAN ERROR
                     Swal.fire('Gagal!', data.message, 'error');
                 }
             })
@@ -259,7 +259,7 @@ function deleteProduct(id) {
         }
     })
 }
-// 3. Fitur Update Stok dengan SweetAlert Input
+// 3.Update Stok 
 function updateStock(id, currentStock) {
     Swal.fire({
         title: 'Update Stok Barang',
@@ -276,7 +276,7 @@ function updateStock(id, currentStock) {
         if (result.isConfirmed) {
             let newStock = result.value;
             
-            // Panggil API Update Stock (Pake FormData agar mudah)
+            // Panggil API Update Stock 
             let formData = new FormData();
             formData.append('action', 'update_stock');
             formData.append('id', id);
@@ -307,7 +307,7 @@ function updateStock(id, currentStock) {
     })
 }
 
-// 4. Fitur Search 
+// 4. Search 
 function searchProduct() {
     let keyword = document.getElementById('searchInput').value;
     let tbody = document.getElementById('productTableBody');

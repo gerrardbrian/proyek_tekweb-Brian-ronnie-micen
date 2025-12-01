@@ -1,5 +1,5 @@
 <?php
-// 1. Mulai Session & Cek Security (WAJIB)
+// 1. Mulai Session & Cek Security
 session_start();
 
 // Pastikan hanya admin yang bisa akses
@@ -9,25 +9,22 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-// 2. Set Header JSON
 header('Content-Type: application/json');
 
-// 3. Include File
+// 2. Include File
 require_once 'database.php';
 require_once 'product.php';
 
-// 4. Koneksi Database
+// 3. Koneksi Database
 $database = new Database();
 $db = $database->getConnection();
 $product = new Product($db);
 
-// 5. Tangkap Action (Bisa dari GET atau POST)
-// Menggunakan $_REQUEST agar bisa menangkap keduanya
+// 4. Tangkap Action 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 
-// ==========================================
+
 // A. UPDATE STOK (via POST)
-// ==========================================
 if ($action == 'update_stock' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $_POST['id'];
     $stock = $_POST['stock'];
@@ -51,9 +48,7 @@ if ($action == 'update_stock' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
 }
 
-// ==========================================
-// B. HAPUS PRODUK (via GET)
-// ==========================================
+// B. HAPUS PRODUK 
 if ($action == 'delete') {
     $id = isset($_GET['id']) ? $_GET['id'] : '';
 
@@ -74,9 +69,7 @@ if ($action == 'delete') {
     exit;
 }
 
-// ==========================================
-// C. PENCARIAN (via GET)
-// ==========================================
+// C. PENCARIAN 
 if ($action == 'search') {
     $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
     

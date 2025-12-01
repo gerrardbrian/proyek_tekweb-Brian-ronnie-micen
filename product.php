@@ -15,7 +15,7 @@ class product {
         return $stmt;
     }
 
-    // 2. CREATE (PERBAIKAN: Menggunakan Syntax PDO yang Benar)
+    // 2. CREATE 
     public function create($name, $price, $desc, $stock, $image) {
         // Setup Upload
         $target_dir = "uploads/";
@@ -23,14 +23,11 @@ class product {
         move_uploaded_file($image["tmp_name"], $target_file);
         $image_name = $image["name"];
         
-        // Query menggunakan tanda tanya (?) sebagai placeholder
         $query = "INSERT INTO " . $this->table . " (name, price, description, stock, image) VALUES (?, ?, ?, ?, ?)";
     
         $stmt = $this->conn->prepare($query);
 
-        // DI SINI PERUBAHANNYA:
-        // Hapus bind_param (itu punya MySQLi).
-        // Masukkan data langsung ke dalam execute() berupa array urut.
+        
         $data = [
             htmlspecialchars(strip_tags($name)),
             htmlspecialchars(strip_tags($price)),
@@ -45,8 +42,7 @@ class product {
         return false;
     }
 
-    // 3. DELETE (Untuk AJAX)
-   // 3. DELETE (DIPERBAIKI UNTUK MENANGKAP ERROR)
+    // 3. DELETE 
     public function delete($id) {
         try {
             // 1. Cek apakah barang ini ada di order_details (Sudah pernah laku?)
@@ -96,7 +92,7 @@ class product {
         $keyword = "%{$keyword}%";
         $stmt->bindParam(":keyword", $keyword);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC); // Mengembalikan array asosiatif agar mudah di-loop di JS
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); 
     }
 }
 ?>
